@@ -49,7 +49,9 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        raise NotImplementedError
+        raise NotImplementedError(
+            "Метод должен быть переопределен в подклассах."
+        )
 
     def show_training_info(self) -> InfoMessage:
         return InfoMessage(
@@ -84,7 +86,7 @@ class SportsWalking(Training):
 
     WEIGHT_COEFFICIENT: float = 0.035  # Коэффициент для веса
     HEIGHT_COEFFICIENT: float = 0.029  # Коэффициент для роста
-    COEFFICIENT_3: float = 0.278  # Дополнительный коэффициент
+    HEIGHT_ADDITIONAL_COEFF: float = 0.278  # Дополнительный коэффициент
     HEIGHT_SCALE: int = 100
 
     def __init__(
@@ -96,7 +98,7 @@ class SportsWalking(Training):
     def get_spent_calories(self) -> float:
         return (
             self.WEIGHT_COEFFICIENT * self.weight
-            + ((self.get_mean_speed() * self.COEFFICIENT_3) ** 2
+            + ((self.get_mean_speed() * self.HEIGHT_ADDITIONAL_COEFF) ** 2
                / (self.height / self.HEIGHT_SCALE))
             * self.HEIGHT_COEFFICIENT
             * self.weight
@@ -127,7 +129,7 @@ class Swimming(Training):
                 * self.CALORIES_COEFFICIENT * self.weight * self.duration)
 
 
-TRAINING_CLASSES: Dict[str, type] = {
+TRAINING_CLASSES: Dict[str, type[Training]] = {
     "SWM": Swimming,
     "RUN": Running,
     "WLK": SportsWalking,
@@ -137,8 +139,7 @@ TRAINING_CLASSES: Dict[str, type] = {
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
     if workout_type in TRAINING_CLASSES:
-        training_class = TRAINING_CLASSES[workout_type]
-        return training_class(*data)
+        return TRAINING_CLASSES[workout_type](*data)
     raise ValueError(f"Неподдерживаемый код тренировки: {workout_type}")
 
 
